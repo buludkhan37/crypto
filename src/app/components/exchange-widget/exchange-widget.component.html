@@ -1,0 +1,56 @@
+<div class="header">
+    <div class="exchange-selector">
+        <label for="exchange">Выберите биржу:</label>
+        <select id="exchange" [(ngModel)]="selectedExchange">
+            <option *ngFor="let exchange of exchanges" [value]="exchange">{{ exchange }}</option>
+        </select>
+    </div>
+    <div class="time" (mouseenter)="toggleTIme(false)" (mouseleave)="toggleTIme(true)">
+        {{ displayedTime }}
+    </div>
+</div>
+
+<div class="instrument-table">
+    <div class="filter">
+        <input
+            type="text"
+            placeholder="Поиск по инструментам..."
+            [(ngModel)]="filterText"
+            (ngModelChange)="filter$.next(filterText)"
+        />
+    </div>
+    <cdk-virtual-scroll-viewport itemSize="40" class="scroll-container">
+        <table class="table">
+            <thead class="new">
+                <tr>
+                    <th>Инструмент</th>
+                    <th>Цена ↑↓</th>
+                    <th>Объем</th>
+                    <th>Изменение (%)</th>
+                    <th>Макс/Мин за 24ч</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngIf="noInstrumentsFound">
+                    <td colspan="5" class="no-results">
+                        Нет инструментов, соответствующих запросу.
+                    </td>
+                </tr>
+                <tr *ngFor="let instrument of filteredInstruments$ | async; trackBy: trackBySymbol">
+                    <td>{{ instrument.symbol }}</td>
+                    <td>{{ instrument.price | number: '1.4-4' }}</td>
+                    <td>{{ instrument.volume }}</td>
+                    <td
+                        [ngClass]="{
+                            positive: instrument.priceChangePercent > 0,
+                            negative: instrument.priceChangePercent < 0,
+                        }"
+                    >
+                        {{ instrument.priceChangePercent }}
+                    </td>
+                    <td>{{ instrument.highPrice }} / {{ instrument.lowPrice }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </cdk-virtual-scroll-viewport>
+</div>
